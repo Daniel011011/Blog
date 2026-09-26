@@ -1,0 +1,9 @@
+{
+  "app:new-file": [],
+  "zk-prefixer": [
+    {
+      "modifiers": ["Mod"],
+      "key": "n"
+    }
+  ]
+}

@@ -24,7 +24,7 @@
     const post = data();
     const date = post.date && !Number.isNaN(new Date(post.date).valueOf()) ? new Date(post.date).toISOString() : new Date().toISOString();
     const tags = [...new Set(post.tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean))];
-    return `---\ntitle: ${JSON.stringify(post.title)}\ndate: ${JSON.stringify(date)}\nupdated: ${JSON.stringify(new Date(Math.max(Date.now(), Date.parse(date))).toISOString())}\ntags: ${JSON.stringify(tags)}\ndescription: ${JSON.stringify(post.description)}\ndraft: ${post.draft}\n---\n\n${post.body}\n`;
+    return `---\ntitle: ${JSON.stringify(post.title)}\ndate: ${JSON.stringify(date)}\ntags: ${JSON.stringify(tags)}\ndescription: ${JSON.stringify(post.description)}\ndraft: ${post.draft}\n---\n\n${post.body}\n`;
   }
   const filename = () => `${form.elements.date.value.slice(0, 10)}-${form.elements.slug.value}.md`;
   // Raw HTML is disabled in the browser preview; build-time HTML is sanitized separately.

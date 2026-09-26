@@ -1,9 +1,9 @@
 ---
 title: "新文章标题"
-date: "2026-09-20T12:00:00+08:00"
-updated: "2026-09-20T12:00:00+08:00"
-tags: ["生活", "思考"]
-description: "可选的一句话简介，留空则自动从正文提取。"
+date: "{{date:YYYY-MM-DD[T]HH:mm:ssZ}}"
+slug: "{{date:YYYYMMDDHHmmssSSS}}"
+tags: []
+description: ""
 draft: true
 ---
 

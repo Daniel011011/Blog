@@ -5,6 +5,7 @@ import { parse, stringify } from 'yaml';
 import MarkdownIt from 'markdown-it';
 import sanitizeHtml from 'sanitize-html';
 import hljs from 'highlight.js';
+import { createPostDateResolver } from './post-dates.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const config = JSON.parse(await fs.readFile(path.join(root, 'site.config.json'), 'utf8'));
@@ -113,10 +114,12 @@ export async function filesIn(directory) {
 
 export async function loadPosts(directory = path.join(root, 'content/posts')) {
   const files = await filesIn(directory);
+  const resolveDates = await createPostDateResolver(directory);
   const posts = await Promise.all(files.map(async file => {
     const filename = path.relative(directory, file).replaceAll('\\', '/');
     const { data, body } = readFrontmatter(await fs.readFile(file, 'utf8'), filename);
-    return { ...validatePost(data, filename), body, filename };
+    const post = await resolveDates(validatePost(data, filename), file);
+    return { ...post, body, filename };
   }));
   const slugs = new Set();
   for (const post of posts) {

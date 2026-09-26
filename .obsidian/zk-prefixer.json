@@ -1,0 +1,5 @@
+{
+  "folder": "content/posts",
+  "template": "content/templates/post",
+  "format": "YYYY-MM-DD-HHmmss"
+}
