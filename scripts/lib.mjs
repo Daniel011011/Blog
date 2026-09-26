@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import sanitizeHtml from 'sanitize-html';
 import hljs from 'highlight.js';
 import { createPostDateResolver } from './post-dates.mjs';
+import { createImageAssets, obsidianImages } from './local-images.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const config = JSON.parse(await fs.readFile(path.join(root, 'site.config.json'), 'utf8'));
@@ -49,9 +50,9 @@ const markdown = new MarkdownIt({
   highlight(code, language) {
     return language && hljs.getLanguage(language) ? hljs.highlight(code, { language, ignoreIllegals: true }).value : '';
   },
-});
+}).use(obsidianImages);
 
-export function renderMarkdown(body, { imageBase = siteURL.href, links = new Map(), issueLinks = new Map(), filename = '' } = {}) {
+export function renderMarkdown(body, { imageBase = siteURL.href, resolveImage, links = new Map(), issueLinks = new Map(), filename = '' } = {}) {
   const tokens = markdown.parse(body, {});
   const headings = [];
   let headingIndex = 0;
@@ -79,7 +80,7 @@ export function renderMarkdown(body, { imageBase = siteURL.href, links = new Map
     allowedClasses: { code: ['language-*'], span: ['hljs-*'] },
     allowedSchemes: ['http', 'https', 'mailto'],
     transformTags: {
-      img: (_, attrs) => ({ tagName: 'img', attribs: { ...attrs, src: assetURL(attrs.src), loading: 'lazy', decoding: 'async' } }),
+      img: (_, attrs) => ({ tagName: 'img', attribs: { ...attrs, src: resolveImage ? resolveImage(archivedImages[attrs.src] ? url(archivedImages[attrs.src]) : attrs.src) : assetURL(attrs.src), loading: 'lazy', decoding: 'async' } }),
       a: (_, attrs) => {
         let href = attrs.href || '';
         if (/^https?:\/\/daniel011011-cdn\.gitblog\.xyz(?:\/|$)/.test(href)) {
@@ -112,8 +113,9 @@ export async function filesIn(directory) {
   return files.flat().filter(file => file.endsWith('.md')).sort();
 }
 
-export async function loadPosts(directory = path.join(root, 'content/posts')) {
+export async function loadPosts(directory = path.join(root, 'content/posts'), { imageAssets } = {}) {
   const files = await filesIn(directory);
+  imageAssets ||= await createImageAssets(root, base);
   const resolveDates = await createPostDateResolver(directory);
   const posts = await Promise.all(files.map(async file => {
     const filename = path.relative(directory, file).replaceAll('\\', '/');
@@ -129,7 +131,7 @@ export async function loadPosts(directory = path.join(root, 'content/posts')) {
   const published = posts.filter(post => !post.draft);
   const links = new Map(published.map(post => [post.filename, post.slug]));
   const issueLinks = new Map(published.filter(post => post.issueRepository === config.issueSource).map(post => [String(post.issue), post.slug]));
-  return published.map(post => ({ ...post, ...renderMarkdown(post.body, { links, issueLinks, filename: post.filename }) }))
+  return published.map(post => ({ ...post, ...renderMarkdown(post.body, { links, issueLinks, filename: post.filename, resolveImage: value => imageAssets.resolve(value, path.join(directory, post.filename)) }) }))
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date) || a.slug.localeCompare(b.slug));
 }
 

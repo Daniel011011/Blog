@@ -86,7 +86,7 @@ test('static build includes all articles, RSS, tags and valid internal page/asse
     const html = await fs.readFile(file, 'utf8');
     for (const [, reference] of html.matchAll(/(?:href|src)="([^"#]+)"/g)) {
       if (!reference.startsWith(base) || reference.startsWith('//')) continue;
-      const target = reference.split('#')[0].split('?')[0].slice(base.length);
+      const target = decodeURIComponent(reference.split('#')[0].split('?')[0].slice(base.length));
       await assert.doesNotReject(fs.access(path.join(dist, target, target.endsWith('/') || !target ? 'index.html' : '')), `${file}: ${reference}`);
     }
   }

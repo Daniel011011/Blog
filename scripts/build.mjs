@@ -1,9 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { config, root, siteURL, url, absolute, escape as e, dateLabel, tagSlug, loadPosts } from './lib.mjs';
+import { config, root, siteURL, base, url, absolute, escape as e, dateLabel, tagSlug, loadPosts } from './lib.mjs';
+import { createImageAssets } from './local-images.mjs';
 
 const output = path.join(root, 'dist');
-const posts = await loadPosts();
+const imageAssets = await createImageAssets(root, base);
+const posts = await loadPosts(undefined, { imageAssets });
 const tags = new Map();
 for (const post of posts) for (const tag of post.tags) tags.set(tag, [...(tags.get(tag) || []), post]);
 const sortedTags = [...tags].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'zh-CN'));
@@ -13,6 +15,7 @@ if (path.dirname(output) !== path.resolve(root) || path.basename(output) !== 'di
 await fs.rm(output, { recursive: true, force: true });
 await fs.mkdir(path.join(output, 'assets'), { recursive: true });
 await fs.cp(path.join(root, 'public'), output, { recursive: true });
+await imageAssets.copyTo(output);
 await fs.copyFile(path.join(root, 'node_modules/markdown-it/dist/browser/markdown-it.umd.min.js'), path.join(output, 'assets/markdown-it.min.js'));
 await fs.copyFile(path.join(root, 'node_modules/highlight.js/styles/github.css'), path.join(output, 'assets/code-light.css'));
 await fs.copyFile(path.join(root, 'node_modules/highlight.js/styles/github-dark.css'), path.join(output, 'assets/code-dark.css'));

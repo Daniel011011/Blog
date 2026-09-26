@@ -13,4 +13,4 @@ draft: true
 
 支持 **粗体**、*斜体*、[链接](https://example.com)、表格和代码块。
 
-图片放在 `public/images/`，在文章里用 `![图片说明](/images/example.jpg)` 引用。
+图片可以直接粘贴或拖入 Obsidian；发布时将图片文件和文章一起提交。

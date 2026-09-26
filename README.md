@@ -49,7 +49,11 @@ draft: false
 - `tags: []` 表示没有标签，标签无需预先创建。
 - 可选 `slug: an-afternoon` 固定文章链接；不写则使用文件名。**已发布文章不要随意改文件名或 slug**，否则原 URL 和 RSS 的文章标识会改变。
 - 未来日期不会定时发布。只有提交触发构建；需要隐藏时用 `draft: true`。
-- 图片放在 `public/images/`，Markdown 写 `![说明](/images/photo.jpg)`。生成器会自动适配 `/Blog/` 子路径。
+- 图片可以直接粘贴或拖入 Obsidian，默认存入 `content/attachments/`。提交时把文章和新增图片一起勾选并推送，博客会自动发布引用到的图片，无需图床。
+- 支持 Obsidian 的 `![[图片.png]]`、`![[content/attachments/图片.png|300]]`、`![[图片.png|300x200]]`，以及普通 Markdown 的相对路径和仓库路径（例如 `![说明](../attachments/图片.png)`）。中文和空格文件名均可使用。
+- 已有的 `public/images/` 图片及 `![说明](/images/photo.jpg)` 写法继续可用，生成器自动适配 `/Blog/` 子路径。HTML 的 `<img src="...">` 同样支持本地图片。
+- 短图片名优先匹配文章同目录，再匹配仓库/公开目录，最后查找仓库内唯一的同名文件。若有多个同名图片，请使用完整的仓库路径；若图片漏提交、路径错误或指向仓库外，构建会明确报错，避免发布坏图。外部图片链接仍使用原地址。
+- PNG、JPEG、GIF、WebP、AVIF、SVG、BMP、ICO 图片可用。`public/` 之外仅复制已发布文章引用的图片，并按内容生成独立链接；草稿独用的附件不会自动进入网站。仓库本身若公开，已提交文件仍可在 GitHub 查看。
 - 站内文章可用 `[另一篇](./another-post.md)`；构建会校验引用并改为文章 URL。所有文章 slug 必须唯一。
 - Markdown 中的安全 HTML（例如旧 Issue 的 `<img>`）会保留；脚本、事件属性、iframe 等会被清除。
 
@@ -60,6 +64,8 @@ draft: false
 1. 在 Blog 仓库按 **Ctrl+N**，或点击左侧功能区的「创建时间戳笔记」。文章直接建在 `content/posts/`，自动插入 `content/templates/post.md` 的内容、当前日期及固定链接标识。
 2. 将属性 `title` 中的「新文章标题」改成文章标题，写正文，标签和简介可选。文件名可改成中文；模板生成的 `slug` 固定文章链接，请保留。
 3. 写完取消勾选 `draft`，提交并推送到 `main`。网页自动构建、发布；以后修改正文再提交即可，更新时间由博客处理。
+
+插图直接粘贴即可。GitHub Desktop 提交时同时选中文章和新增图片文件；只有本地粘贴、保存不会自动上传。附件目录设置随本仓库保存，使用已经打开的旧窗口时可重新加载一次以应用。
 
 这个快捷键只在 Blog 仓库生效。文件列表的普通「新建笔记」仍会创建空白笔记；也可以先在 `content/posts/` 或其子文件夹创建笔记，再通过命令面板的「模板：插入模板」选择 `post`。不要直接复制模板文件，日期占位符需要由 Obsidian 插入模板时替换。
 
@@ -125,6 +131,7 @@ node scripts/archive-images.mjs
 
 ```text
 content/posts/        Markdown 文章，日常编辑这里
+content/attachments/ Obsidian 粘贴的图片，随文章一起提交
 content/templates/   新文章模板
 content/imports/     旧 Issues 原始快照和图片映射
 public/images/       图片（原样复制到站点）
